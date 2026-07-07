@@ -1,29 +1,28 @@
 # Event Ledger Microservices
 
-A Spring Boot microservices application that demonstrates event-driven financial transaction processing with production-ready features such as observability, resiliency, and REST-based communication.
+A Spring Boot microservices application demonstrating event-driven financial transaction processing using Spring Boot, Spring Data JPA, Eureka Service Registry, and MySQL.
 
 ---
 
-## Project Overview
+# Project Overview
 
 This project consists of three microservices:
 
-1. **eventLedger**
-   - Receives financial transaction events.
-   - Validates incoming requests.
-   - Persists event data.
-   - Forwards transactions to the Account Service.
-   - Implements observability and resiliency.
+## 1. service-register
+- Eureka Server
+- Service Discovery for all microservices
 
-2. **accounthandle**
-   - Creates and manages customer accounts.
-   - Updates account balances.
-   - Stores transaction history.
-   - Exposes account REST APIs.
+## 2. eventLedger
+- Accepts event requests
+- Stores event details
+- Retrieves events
+- Provides event health endpoint
 
-3. **service-register**
-   - Eureka Service Registry for service discovery.
-   - Registers all microservices.
+## 3. accounthandle
+- Creates customer accounts
+- Processes transactions
+- Maintains account balances
+- Stores transaction history
 
 ---
 
@@ -34,11 +33,9 @@ This project consists of three microservices:
 - Spring Data JPA
 - Spring Web
 - MySQL
-- Spring Actuator
 - Spring Cloud Netflix Eureka
-- Resilience4j
+- Spring Boot Actuator
 - Maven
-- REST APIs
 
 ---
 
@@ -47,34 +44,20 @@ This project consists of three microservices:
 ```
 event-ledger-microservices
 │
+├── service-register
+│
 ├── eventLedger
 │
 ├── accounthandle
-│
-├── service-register
 │
 └── README.md
 ```
 
 ---
 
-# Features
+# Database Setup
 
-- Event Processing
-- Account Management
-- REST Communication
-- Service Discovery using Eureka
-- Health Monitoring
-- Metrics using Spring Boot Actuator
-- Structured Logging
-- Resilience using Circuit Breaker
-- Production Ready Configuration
-
----
-
-# Database
-
-Create the following MySQL databases.
+Create the following databases in MySQL.
 
 ```sql
 CREATE DATABASE event_ledger_gateway;
@@ -84,11 +67,11 @@ CREATE DATABASE account_service;
 
 ---
 
-# Run Order
+# Running the Application
 
-Start the services in the following order.
+Start the applications in the following order.
 
-### 1. Eureka Service Registry
+### 1. Eureka Server
 
 ```
 service-register
@@ -136,8 +119,10 @@ http://localhost:8080
 
 ### Create Account
 
+**POST**
+
 ```
-POST /accounts/{accountId}
+/accounts/{id}
 ```
 
 Example
@@ -148,92 +133,119 @@ POST http://localhost:8081/accounts/ACC1001
 
 ---
 
-### Get Account
-
-```
-GET /accounts/{accountId}
-```
-
----
-
-### Get Balance
-
-```
-GET /accounts/{accountId}/balance
-```
-
----
-
 ### Apply Transaction
 
+**POST**
+
 ```
-POST /accounts/{accountId}/transactions
+/accounts/transaction
 ```
 
 Example Request
 
 ```json
 {
-    "eventId":"EVT001",
-    "amount":500
+    "eventId": "EVT001",
+    "accountId": "ACC1001",
+    "amount": 500,
+    "timestamp": "2026-07-08T10:30:00"
 }
 ```
 
 ---
 
-## Event Ledger
+### Get Account Balance
+
+**GET**
+
+```
+/accounts/{id}/balance
+```
+
+Example
+
+```
+GET http://localhost:8081/accounts/ACC1001/balance
+```
+
+---
+
+## Event Ledger Service
 
 ### Create Event
 
+**POST**
+
 ```
-POST /events
+/events
 ```
 
 Example Request
 
 ```json
 {
-    "eventId":"EVT001",
-    "accountId":"ACC1001",
-    "type":"CREDIT",
-    "amount":500,
-    "currency":"INR"
+    "eventId": "EVT001",
+    "accountId": "ACC1001",
+    "balance": 500
 }
 ```
 
 ---
 
-# Observability
+### Get Event By ID
 
-Spring Boot Actuator is enabled.
-
-Available endpoints
+**GET**
 
 ```
-/actuator/health
+/events/{id}
+```
 
-/actuator/info
+Example
 
-/actuator/metrics
+```
+GET http://localhost:8080/events/EVT001
 ```
 
 ---
 
-# Resiliency
+### Get Events By Account
 
-The project uses Resilience4j Circuit Breaker to provide graceful handling when downstream services are unavailable.
+**GET**
+
+```
+/events?accountId=ACC1001
+```
 
 ---
 
-# Logging
+### Health Check
 
-Structured logging is enabled for better observability.
+**GET**
+
+```
+/events/health
+```
+
+---
+
+# Features
+
+- Spring Boot Microservices
+- Eureka Service Discovery
+- REST APIs
+- Account Management
+- Event Management
+- Transaction Processing
+- MySQL Database
+- Spring Data JPA
+- Spring Boot Actuator
+- Structured Logging
 
 ---
 
 # Build
 
-For each project
+For each project:
 
 ```bash
 mvn clean install
@@ -249,14 +261,14 @@ mvn spring-boot:run
 
 ---
 
-# Future Improvements
+# Future Enhancements
 
-- Kafka-based asynchronous communication
-- Distributed Tracing
+- Kafka Integration
+- Resilience4j Circuit Breaker
 - Docker Support
 - Kubernetes Deployment
+- Distributed Tracing
 - Centralized Logging
-- OpenTelemetry Integration
 
 ---
 
@@ -264,6 +276,6 @@ mvn spring-boot:run
 
 **Pradyumna Dilip Khot**
 
-GitHub
+GitHub Repository:
 
 https://github.com/Pradhumnkhot/event-ledger-microservices
