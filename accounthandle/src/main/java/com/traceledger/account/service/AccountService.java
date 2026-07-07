@@ -2,6 +2,7 @@ package com.traceledger.account.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.traceledger.account.model.Account;
 import com.traceledger.account.model.Transaction;
 import com.traceledger.account.repository.AccountRepository;
