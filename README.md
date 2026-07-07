@@ -1,28 +1,61 @@
 # Event Ledger Microservices
 
-A Spring Boot microservices application demonstrating event-driven financial transaction processing using Spring Boot, Spring Data JPA, Eureka Service Registry, and MySQL.
+A production-ready Spring Boot microservices application demonstrating event-driven financial transaction processing with Observability, Resiliency, Service Discovery, and REST-based communication.
 
 ---
 
 # Project Overview
 
-This project consists of three microservices:
+This project consists of three Spring Boot microservices.
 
 ## 1. service-register
-- Eureka Server
-- Service Discovery for all microservices
+
+- Eureka Service Registry
+- Service Discovery
+
+Runs on:
+
+```
+http://localhost:8761
+```
+
+---
 
 ## 2. eventLedger
-- Accepts event requests
-- Stores event details
-- Retrieves events
-- Provides event health endpoint
+
+Responsibilities
+
+- Accept financial events
+- Validate requests
+- Persist events
+- Forward transactions to Account Service
+- Circuit Breaker with Resilience4j
+- Trace ID Propagation
+- Custom Metrics
+- Structured Logging
+
+Runs on:
+
+```
+http://localhost:8080
+```
+
+---
 
 ## 3. accounthandle
-- Creates customer accounts
-- Processes transactions
-- Maintains account balances
-- Stores transaction history
+
+Responsibilities
+
+- Create accounts
+- Process CREDIT/DEBIT transactions
+- Update balances
+- Store transaction history
+
+Runs on:
+
+```
+http://localhost:8081
+```
 
 ---
 
@@ -35,6 +68,8 @@ This project consists of three microservices:
 - MySQL
 - Spring Cloud Netflix Eureka
 - Spring Boot Actuator
+- Micrometer Metrics
+- Resilience4j Circuit Breaker
 - Maven
 
 ---
@@ -55,9 +90,41 @@ event-ledger-microservices
 
 ---
 
-# Database Setup
+# Features
 
-Create the following databases in MySQL.
+## Functional
+
+- Event Management
+- Account Management
+- Transaction Processing
+- REST Communication
+- Service Discovery
+
+## Observability
+
+- Spring Boot Actuator
+- Custom Metrics using Micrometer
+- Structured Logging
+- Trace ID Propagation
+
+## Resiliency
+
+- Resilience4j Circuit Breaker
+- Retry Mechanism
+- Graceful Error Handling
+
+## Production Ready
+
+- Global Exception Handling
+- Request Validation
+- Idempotent Event Processing
+- Health Monitoring
+
+---
+
+# Database
+
+Create the following MySQL databases.
 
 ```sql
 CREATE DATABASE event_ledger_gateway;
@@ -77,38 +144,16 @@ Start the applications in the following order.
 service-register
 ```
 
-Runs on
-
-```
-http://localhost:8761
-```
-
----
-
 ### 2. Account Service
 
 ```
 accounthandle
 ```
 
-Runs on
-
-```
-http://localhost:8081
-```
-
----
-
-### 3. Event Ledger Service
+### 3. Event Ledger
 
 ```
 eventLedger
-```
-
-Runs on
-
-```
-http://localhost:8080
 ```
 
 ---
@@ -119,10 +164,8 @@ http://localhost:8080
 
 ### Create Account
 
-**POST**
-
 ```
-/accounts/{id}
+POST /accounts/{id}
 ```
 
 Example
@@ -135,31 +178,28 @@ POST http://localhost:8081/accounts/ACC1001
 
 ### Apply Transaction
 
-**POST**
-
 ```
-/accounts/transaction
+POST /accounts/transaction
 ```
 
-Example Request
+Example
 
 ```json
 {
-    "eventId": "EVT001",
-    "accountId": "ACC1001",
-    "amount": 500,
-    "timestamp": "2026-07-08T10:30:00"
+  "eventId": "EVT001",
+  "accountId": "ACC1001",
+  "type": "CREDIT",
+  "amount": 500,
+  "timestamp": "2026-07-08T10:30:00"
 }
 ```
 
 ---
 
-### Get Account Balance
-
-**GET**
+### Get Balance
 
 ```
-/accounts/{id}/balance
+GET /accounts/{id}/balance
 ```
 
 Example
@@ -170,23 +210,24 @@ GET http://localhost:8081/accounts/ACC1001/balance
 
 ---
 
-## Event Ledger Service
+## Event Ledger
 
 ### Create Event
 
-**POST**
-
 ```
-/events
+POST /events
 ```
 
-Example Request
+Example
 
 ```json
 {
-    "eventId": "EVT001",
-    "accountId": "ACC1001",
-    "balance": 500
+  "eventId": "EVT001",
+  "accountId": "ACC1001",
+  "type": "CREDIT",
+  "amount": 500,
+  "currency": "INR",
+  "eventTimestamp": "2026-07-08T10:30:00"
 }
 ```
 
@@ -194,58 +235,64 @@ Example Request
 
 ### Get Event By ID
 
-**GET**
-
 ```
-/events/{id}
-```
-
-Example
-
-```
-GET http://localhost:8080/events/EVT001
+GET /events/{id}
 ```
 
 ---
 
 ### Get Events By Account
 
-**GET**
-
 ```
-/events?accountId=ACC1001
+GET /events?accountId=ACC1001
 ```
 
 ---
 
 ### Health Check
 
-**GET**
-
 ```
-/events/health
+GET /events/health
 ```
 
 ---
 
-# Features
+# Actuator Endpoints
 
-- Spring Boot Microservices
-- Eureka Service Discovery
-- REST APIs
-- Account Management
-- Event Management
-- Transaction Processing
-- MySQL Database
-- Spring Data JPA
+```
+/actuator/health
+
+/actuator/info
+
+/actuator/metrics
+
+/actuator/metrics/events.created
+```
+
+---
+
+# Resilience
+
+Implemented using **Resilience4j**.
+
+- Circuit Breaker
+- Retry
+- Graceful Fallback
+
+---
+
+# Observability
+
+Implemented using:
+
 - Spring Boot Actuator
+- Micrometer Metrics
+- Trace ID Propagation
 - Structured Logging
 
 ---
 
 # Build
-
-For each project:
 
 ```bash
 mvn clean install
@@ -263,12 +310,12 @@ mvn spring-boot:run
 
 # Future Enhancements
 
-- Kafka Integration
-- Resilience4j Circuit Breaker
-- Docker Support
-- Kubernetes Deployment
+- Docker
+- Kubernetes
+- OpenTelemetry
 - Distributed Tracing
-- Centralized Logging
+- Prometheus
+- Grafana
 
 ---
 
@@ -276,6 +323,6 @@ mvn spring-boot:run
 
 **Pradyumna Dilip Khot**
 
-GitHub Repository:
+GitHub Repository
 
 https://github.com/Pradhumnkhot/event-ledger-microservices
